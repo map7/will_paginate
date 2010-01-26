@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 require 'will_paginate/core_ext'
 
 module WillPaginate
@@ -7,7 +8,7 @@ module WillPaginate
   # pagination links for the given collection. The helper itself is lightweight
   # and serves only as a wrapper around LinkRenderer instantiation; the
   # renderer then does all the hard work of generating the HTML.
-  # 
+  #
   # == Global options for helpers
   #
   # Options for pagination helpers are optional and get their default values from the
@@ -39,7 +40,7 @@ module WillPaginate
     # Renders Digg/Flickr-style pagination for a WillPaginate::Collection
     # object. Nil is returned if there is only one page in total; no point in
     # rendering the pagination in that case...
-    # 
+    #
     # ==== Options
     # Display options:
     # * <tt>:previous_label</tt> -- default: "« Previous" (this parameter is called <tt>:prev_label</tt> in versions <b>2.3.2</b> and older!)
@@ -48,7 +49,7 @@ module WillPaginate
     # * <tt>:inner_window</tt> -- how many links are shown around the current page (default: 4)
     # * <tt>:outer_window</tt> -- how many links are around the first and the last page (default: 1)
     # * <tt>:separator</tt> -- string separator for page HTML elements (default: single space)
-    # 
+    #
     # HTML options:
     # * <tt>:class</tt> -- CSS class name for the generated DIV (default: "pagination")
     # * <tt>:container</tt> -- toggles rendering of the DIV container for pagination links, set to
@@ -66,7 +67,7 @@ module WillPaginate
     #
     # All options not recognized by will_paginate will become HTML attributes on the container
     # element for pagination links (the DIV). For example:
-    # 
+    #
     #   <%= will_paginate @posts, :style => 'font-size: small' %>
     #
     # ... will result in:
@@ -96,13 +97,13 @@ module WillPaginate
       end
       # early exit if there is nothing to render
       return nil unless WillPaginate::ViewHelpers.total_pages_for_collection(collection) > 1
-      
+
       options = options.symbolize_keys.reverse_merge WillPaginate::ViewHelpers.pagination_options
       if options[:prev_label]
         WillPaginate::Deprecation::warn(":prev_label view parameter is now :previous_label; the old name has been deprecated", caller)
         options[:previous_label] = options.delete(:prev_label)
       end
-      
+
       # get the renderer instance
       renderer = case options[:renderer]
       when String
@@ -116,10 +117,10 @@ module WillPaginate
       renderer.prepare collection, options, self
       renderer.to_html
     end
-    
+
     # Wrapper for rendering pagination links at both top and bottom of a block
     # of content.
-    # 
+    #
     #   <% paginated_section @posts do %>
     #     <ol id="posts">
     #       <% for post in @posts %>
@@ -141,7 +142,7 @@ module WillPaginate
     # blocks of pagination links sharing the same ID (which is invalid HTML).
     def paginated_section(*args, &block)
       pagination = will_paginate(*args).to_s
-      
+
       unless ActionView::Base.respond_to? :erb_variable
         concat pagination
         yield
@@ -167,7 +168,7 @@ module WillPaginate
     def page_entries_info(collection, options = {})
       entry_name = options[:entry_name] ||
         (collection.empty?? 'entry' : collection.first.class.name.underscore.sub('_', ' '))
-      
+
       if collection.total_pages < 2
         case collection.size
         when 0; "No #{entry_name.pluralize} found"
@@ -182,11 +183,11 @@ module WillPaginate
         ]
       end
     end
-    
+
     if respond_to? :safe_helper
       safe_helper :will_paginate, :paginated_section, :page_entries_info
     end
-    
+
     def self.total_pages_for_collection(collection) #:nodoc:
       if collection.respond_to?('page_count') and !collection.respond_to?('total_pages')
         WillPaginate::Deprecation.warn %{
@@ -210,11 +211,11 @@ module WillPaginate
     #
     #   <span class="gap">&hellip;</span>
     attr_accessor :gap_marker
-    
+
     def initialize
       @gap_marker = '<span class="gap">&hellip;</span>'
     end
-    
+
     # * +collection+ is a WillPaginate::Collection instance or any other object
     #   that conforms to that API
     # * +options+ are forwarded from +will_paginate+ view helper
@@ -236,7 +237,7 @@ module WillPaginate
       # previous/next buttons
       links.unshift page_link_or_span(@collection.previous_page, 'disabled prev_page', @options[:previous_label])
       links.push    page_link_or_span(@collection.next_page,     'disabled next_page', @options[:next_label])
-      
+
       html = links.join(@options[:separator])
       @options[:container] ? @template.content_tag(:div, html, html_attributes) : html
     end
@@ -252,7 +253,7 @@ module WillPaginate
       end
       @html_attributes
     end
-    
+
   protected
 
     # Collects link items for visible page numbers.
@@ -274,7 +275,7 @@ module WillPaginate
       inner_window, outer_window = @options[:inner_window].to_i, @options[:outer_window].to_i
       window_from = current_page - inner_window
       window_to = current_page + inner_window
-      
+
       # adjust lower or upper limit if other is out of bounds
       if window_to > total_pages
         window_from -= window_to - total_pages
@@ -285,7 +286,7 @@ module WillPaginate
         window_from = 1
         window_to = total_pages if window_to > total_pages
       end
-      
+
       visible   = (1..total_pages).to_a
       left_gap  = (2 + outer_window)...window_from
       right_gap = (window_to + 1)...(total_pages - outer_window)
@@ -294,10 +295,10 @@ module WillPaginate
 
       visible
     end
-    
+
     def page_link_or_span(page, span_class, text = nil)
       text ||= page.to_s
-      
+
       if page and page != current_page
         classnames = span_class && span_class.index(' ') && span_class.split(' ', 2).last
         page_link page, text, :rel => rel_value(page), :class => classnames
@@ -317,16 +318,17 @@ module WillPaginate
     # Returns URL params for +page_link_or_span+, taking the current GET params
     # and <tt>:params</tt> option into account.
     def url_for(page)
+=begin
       page_one = page == 1
       unless @url_string and !page_one
         @url_params = {}
         # page links should preserve GET parameters
         stringified_merge @url_params, @template.params if @template.request.get?
         stringified_merge @url_params, @options[:params] if @options[:params]
-        
+
         if complex = param_name.index(/[^\w-]/)
           page_param = parse_query_parameters("#{param_name}=#{page}")
-          
+
           stringified_merge @url_params, page_param
         else
           @url_params[param_name] = page_one ? 1 : 2
@@ -334,7 +336,7 @@ module WillPaginate
 
         url = @template.url_for(@url_params)
         return url if page_one
-        
+
         if complex
           @url_string = url.sub(%r!((?:\?|&amp;)#{CGI.escape param_name}=)#{page}!, "\\1\0")
           return url
@@ -351,6 +353,11 @@ module WillPaginate
       end
       # finally!
       @url_string.sub "\0", page.to_s
+=end
+
+      # Get the controller
+      controller = @template.params[:controller]
+      "/#{controller}?page=#{page}"
     end
 
   private
